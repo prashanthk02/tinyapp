@@ -7,7 +7,7 @@ app.set("view engine", "ejs"); //set ejs view engine
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
-const generateRandomString = function () {
+const generateRandomString = function() {
   return Math.random().toString(36).substring(2, 8);
 };
 
@@ -46,7 +46,11 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    res.status(404).send("Requested URL not found!");
+  }
 });
 
 app.post("/urls", (req, res) => {
