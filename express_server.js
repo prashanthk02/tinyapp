@@ -53,16 +53,29 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
+//upon request for shortURL creation server generates a shortURL and save short and long URL to database
 app.post("/urls", (req, res) => {
-  console.log(req.body);
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
   urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
 });
 
+//upon delete request server deletes the requested url from database
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
+});
+
+//send an edit request to the server, server redirects to /urls/shortURL
+app.post("/urls/:shortURL/edit", (req, res) => {
+  const shortURL = req.params.shortURL;
+  res.redirect(`/urls/${shortURL}`);
+});
+
+//changes made by client are saved to the database and redirected to /urls
+app.post("/urls/:shortURL", (req, res) => {
+  urlDatabase[req.params.shortURL] = req.body.longURL;
   res.redirect("/urls");
 });
 
