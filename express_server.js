@@ -17,8 +17,17 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const username = {
-  // "username": "kpr"
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
 };
 
 app.get("/", (req, res) => {
@@ -89,6 +98,14 @@ app.post("/urls/:shortURL", (req, res) => {
 app.get("/register", (req, res) => {
   const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
   res.render("urls_registration", templateVars);
+});
+
+app.post("/register", (req, res) => {
+  const id = generateRandomString();
+  const { email, password } = req.body;
+  users[id] = { id, email, password };
+  res.cookie("user_id", id);
+  res.redirect("/urls");
 });
 
 //login route and set cookie
