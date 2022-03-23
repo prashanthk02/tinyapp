@@ -114,7 +114,7 @@ app.post("/register", (req, res) => {
   if (userEmail === "" || userPassword === "") {
     return res.status(400).send("Please fill in the required fields!!!");
   }
-  if (verifyEmail(req.body.email, users)) {
+  if (verifyEmail(userEmail, users)) {
     return res.status(400).send("Email already exists! Please login")
   }
   const user_id = generateRandomString();
@@ -131,7 +131,19 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req,res) => {
-  res.cookie("user_id", req.body.user_id);
+  if (req.body.email === "" || req.body.password === "") {
+    return res.status(403).send("Please provide email and password");
+  };
+  if (!verifyEmail(req.body.email, users)) {
+    return res.status(403).send("Email not found, please register");
+  };
+  if (verifyEmail(req.body.email, users)) {
+    const id = verifyEmail(req.body.email, users)['user_id'];
+    if (req.body.password !== users[id]['password']) {
+      return res.status(403).send("Incorrect Password");
+    }
+  };
+  res.cookie("user_id", verifyEmail(req.body.email, users)['user_id']);
   res.redirect("/urls");
 });
 
