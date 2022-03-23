@@ -85,6 +85,12 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
+//user registration page route
+app.get("/register", (req, res) => {
+  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  res.render("urls_registration", templateVars);
+});
+
 //login route and set cookie
 app.post("/login", (req,res) => {
   res.cookie("username", req.body.username);
