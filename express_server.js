@@ -105,7 +105,7 @@ app.post("/urls/:shortURL", (req, res) => {
 //user registration page route
 app.get("/register", (req, res) => {
   const templateVars = { urls: urlDatabase, user: req.cookies.user_id };
-  res.render("urls_registration", templateVars);
+  res.render("registration", templateVars);
 });
 
 app.post("/register", (req, res) => {
@@ -125,6 +125,11 @@ app.post("/register", (req, res) => {
 });
 
 //login route and set cookie
+app.get("/login", (req, res) => {
+  const templateVars = { urls: urlDatabase, user: req.cookies.user_id }
+  res.render("login", templateVars);
+});
+
 app.post("/login", (req,res) => {
   res.cookie("user_id", req.body.user_id);
   res.redirect("/urls");
