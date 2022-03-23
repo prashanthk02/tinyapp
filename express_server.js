@@ -17,6 +17,10 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const username = {
+  "username": "kpr"
+};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -77,6 +81,12 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 //changes made by client are saved to the database and redirected to /urls
 app.post("/urls/:shortURL", (req, res) => {
   urlDatabase[req.params.shortURL] = req.body.longURL;
+  res.redirect("/urls");
+});
+
+//add login route and set cookie
+app.post("/login", (req,res) => {
+  res.cookie("username", req.body.username);
   res.redirect("/urls");
 });
 
