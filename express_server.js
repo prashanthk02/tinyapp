@@ -7,6 +7,8 @@ app.set("view engine", "ejs"); //set ejs view engine
 const bodyParser = require("body-parser");
 //const cookieParser = require("cookie-parser");
 const cookieSession = require('cookie-session');
+const bcrypt = require('bcryptjs');
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
   name: 'session',
@@ -17,29 +19,9 @@ const generateRandomString = function() {
   return Math.random().toString(36).substring(2, 8);
 };
 
-const urlDatabase = {
-  b6UTxQ: {
-        longURL: "https://www.tsn.ca",
-        userID: "aJ48lW"
-    },
-    i3BoGr: {
-        longURL: "https://www.google.ca",
-        userID: "aJ48lW"
-    }
-};
+const urlDatabase = {};
 
-const users = { 
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
-  },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
-  }
-};
+const users = {};
 
 const verifyEmail = (email, users) => {
   for (let user in users) {
@@ -150,7 +132,7 @@ app.post("/register", (req, res) => {
   }
   const user_id = generateRandomString();
   const { email, password } = req.body;
-  users[user_id] = { user_id, email, password };
+  users[user_id] = { user_id, email, password: bcrypt.hashSync(password, 10) };
   req.session.userId = user_id;
   res.redirect("/urls");
 });
@@ -170,7 +152,7 @@ app.post("/login", (req,res) => {
   };
   if (verifyEmail(req.body.email, users)) {
     const id = verifyEmail(req.body.email, users)['user_id'];
-    if (req.body.password !== users[id]['password']) {
+    if (!bcrypt.compareSync(req.body.password, users[id]['password'])) {
       return res.status(403).send("Incorrect Password");
     }
   };
