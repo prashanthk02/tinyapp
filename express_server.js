@@ -92,13 +92,24 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //upon delete request server deletes the requested url from database
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
+  const shortURL = req.params.shortURL;
+  const currentUserId = req.session.userId;
+  const urlUserId = urlDatabase[shortURL]["userID"];
+  if (currentUserId !== urlUserId) {
+    return res.status(401).send("Access denied!");
+  }
+  delete urlDatabase[shortURL];
   res.redirect("/urls");
 });
 
 //send an edit request to the server, server redirects to /urls/shortURL
 app.post("/urls/:shortURL/edit", (req, res) => {
   const shortURL = req.params.shortURL;
+  const currentUserId = req.session.userId;
+  const urlUserId = urlDatabase[shortURL]["userID"];
+  if (currentUserId !== urlUserId) {
+    return res.status(401).send("Access denied!");
+  }
   res.redirect(`/urls/${shortURL}`);
 });
 
