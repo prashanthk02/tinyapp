@@ -38,18 +38,6 @@ const verifyEmail = (email, users) => {
   }
 };
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
 app.get("/urls", (req,res) => {
   const templateVars = { urls: urlDatabase, user: users[req.cookies.user_id] };
   res.render("urls_index", templateVars);
@@ -57,6 +45,9 @@ app.get("/urls", (req,res) => {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = { urls: urlDatabase, user: users[req.cookies.user_id] };
+  if (!user) {
+    return res.redirect("/login", templateVars);
+  };
   res.render("urls_new", templateVars);
 });
 
