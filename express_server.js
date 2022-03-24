@@ -60,11 +60,7 @@ app.get("/urls", (req,res) => {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = { urls: urlDatabase, user: users[req.session.userId] };
-  if (req.session.userId) {
-    return res.render("urls_new", templateVars);
-  } else {
-   res.redirect("/login");
-  }
+  res.render("urls_new", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -153,7 +149,7 @@ app.post("/login", (req,res) => {
   if (verifyEmail(req.body.email, users)) {
     const id = verifyEmail(req.body.email, users)['user_id'];
     if (!bcrypt.compareSync(req.body.password, users[id]['password'])) {
-      return res.status(403).send("Incorrect Password");
+      return res.status(403).send("Invalid Credentials");
     }
   };
   req.session.userId = verifyEmail(req.body.email, users)['user_id'];
