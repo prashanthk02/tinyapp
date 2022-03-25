@@ -41,6 +41,15 @@ const userUrls = (urlDatabase, user_id) => {
   return userUrl;
 };
 
+const findLongUrl = (userLongURL, urlDatabase) => {
+  for (let url of Object.keys(urlDatabase)) {
+    if (urlDatabase[url].longURL === userLongURL) {
+      return urlDatabase[url].longURL;
+    }
+  }
+  return null;
+};
+
 app.get("/urls", (req,res) => {
   const currentUserId = req.session.userId;
   if (currentUserId) {
@@ -77,6 +86,10 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
   const userID = req.session.userId;
+  const existingURL = findLongUrl(longURL, urlDatabase);
+  if (existingURL === longURL) {
+    return res.send(`shortURL exists for ${existingURL} <a href="/urls">My URLs</a>`);
+  }
   urlDatabase[shortURL] =  { longURL, userID };
   res.redirect(`/urls/${shortURL}`);
 });
@@ -132,10 +145,10 @@ app.post("/register", (req, res) => {
   const userEmail = req.body.email;
   const userPassword = req.body.password;
   if (userEmail === "" || userPassword === "") {
-    return res.status(400).send("Please fill in the required fields!!!");
+    return res.status(400).send(`Please fill in the <a href="/register">required</a> fields!`);
   }
   if (verifyEmail(userEmail, users)) {
-    return res.status(400).send("Email already exists! Please login")
+    return res.status(400).send(`Email already exists! Please <a href="/login">login</a>`)
   }
   const user_id = generateRandomString();
   const { email, password } = req.body;
