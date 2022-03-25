@@ -56,7 +56,10 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   const longURL = req.body.longURL;
   const userID = req.session.userId;
-  const existingURL = findLongUrl(longURL, urlDatabase);
+  const existingURL = findLongUrl(userID, longURL, urlDatabase);
+  if (!userID) {
+    return res.redirect("/login");
+  }
   if (existingURL === longURL) {
     return res.send(`shortURL exists for ${existingURL} <a href="/urls">My URLs</a>`);
   }

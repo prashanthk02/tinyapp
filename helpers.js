@@ -22,10 +22,12 @@ const userUrls = (urlDatabase, user_id) => {
   return userUrl;
 };
 
-const findLongUrl = (userLongURL, urlDatabase) => {
+const findLongUrl = (userID, userLongURL, urlDatabase) => {
   for (let url of Object.keys(urlDatabase)) {
-    if (urlDatabase[url].longURL === userLongURL) {
-      return urlDatabase[url].longURL;
+    if (urlDatabase[url].userID === userID) {
+      if (urlDatabase[url].longURL === userLongURL) {
+        return urlDatabase[url].longURL;
+      }
     }
   }
   return null;
