@@ -9,6 +9,7 @@ const verifyEmail = (email, users) => {
       return users[user];
     }
   }
+  return undefined;
 };
 
 const userUrls = (urlDatabase, user_id) => {
