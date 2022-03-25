@@ -1,4 +1,5 @@
 const express = require("express");
+const {generateRandomString, verifyEmail, userUrls, findLongUrl} = require('./helpers');
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -15,40 +16,9 @@ app.use(cookieSession({
   keys: ['key1', 'key2']
 }));
 
-const generateRandomString = function() {
-  return Math.random().toString(36).substring(2, 8);
-};
-
 const urlDatabase = {};
 
 const users = {};
-
-const verifyEmail = (email, users) => {
-  for (let user in users) {
-    if (users[user].email === email) {
-      return users[user];
-    }
-  }
-};
-
-const userUrls = (urlDatabase, user_id) => {
-  let userUrl = {};
-  for (let url in urlDatabase) {
-    if (urlDatabase[url]['userID'] === user_id) {
-      userUrl[url] = urlDatabase[url]['longURL']
-    }
-  }
-  return userUrl;
-};
-
-const findLongUrl = (userLongURL, urlDatabase) => {
-  for (let url of Object.keys(urlDatabase)) {
-    if (urlDatabase[url].longURL === userLongURL) {
-      return urlDatabase[url].longURL;
-    }
-  }
-  return null;
-};
 
 app.get("/urls", (req,res) => {
   const currentUserId = req.session.userId;
