@@ -6,7 +6,6 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs"); //set ejs view engine
 
 const bodyParser = require("body-parser");
-//const cookieParser = require("cookie-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 
@@ -19,6 +18,21 @@ app.use(cookieSession({
 const urlDatabase = {};
 
 const users = {};
+
+//root directory redirects to urls page
+app.get("/", (req, res) => {
+  res.redirect("/urls");
+});
+
+app.get("/register", (req, res) => {
+  const templateVars = { urls: urlDatabase, user: req.session.userId };
+  res.render("registration", templateVars);
+});
+
+app.get("/login", (req, res) => {
+  const templateVars = { urls: urlDatabase, user: req.session.userId }
+  res.render("login", templateVars);
+});
 
 app.get("/urls", (req,res) => {
   const currentUserId = req.session.userId;
@@ -42,12 +56,28 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+app.get("/urls/:shortURL", (req, res) => {
+  if (!(req.session.userId)) {
+    return res.status(401).send("Unauthorized access");
+  };
+  if (!urlDatabase[req.params.shortURL]) {
+    return res.status(404).send("Requested URL not found!");
+  };
+  const templateVars = { 
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL].longURL,
+    user: users[req.session.userId]
+  };
+  res.render("urls_show", templateVars);
+});
+
 app.get("/u/:shortURL", (req, res) => {
+  if (!urlDatabase[req.params.shortURL]) {
+    return res.status(404).send("Requested URL not found!");
+  };
   const longURL = urlDatabase[req.params.shortURL].longURL;
   if (longURL) {
     res.redirect(longURL);
-  } else {
-    res.status(404).send("Requested URL not found!");
   }
 });
 
@@ -65,15 +95,6 @@ app.post("/urls", (req, res) => {
   }
   urlDatabase[shortURL] =  { longURL, userID };
   res.redirect(`/urls/${shortURL}`);
-});
-
-app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { 
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL].longURL,
-    user: users[req.session.userId]
-  };
-  res.render("urls_show", templateVars);
 });
 
 //upon delete request server deletes the requested url from database
@@ -109,11 +130,6 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 //user registration page route
-app.get("/register", (req, res) => {
-  const templateVars = { urls: urlDatabase, user: req.session.userId };
-  res.render("registration", templateVars);
-});
-
 app.post("/register", (req, res) => {
   const userEmail = req.body.email;
   const userPassword = req.body.password;
@@ -131,22 +147,17 @@ app.post("/register", (req, res) => {
 });
 
 //login route and set cookie
-app.get("/login", (req, res) => {
-  const templateVars = { urls: urlDatabase, user: req.session.userId }
-  res.render("login", templateVars);
-});
-
 app.post("/login", (req,res) => {
   if (req.body.email === "" || req.body.password === "") {
-    return res.status(403).send("Please provide email and password");
+    return res.status(403).send(`Please provide <a href="/login">email and password</a>`);
   };
   if (!verifyEmail(req.body.email, users)) {
-    return res.status(403).send("Email not found, please register");
+    return res.status(403).send(`Email not found, please <a href="/register">register</a>`);
   };
   if (verifyEmail(req.body.email, users)) {
     const id = verifyEmail(req.body.email, users)['user_id'];
     if (!bcrypt.compareSync(req.body.password, users[id]['password'])) {
-      return res.status(403).send("Invalid Credentials");
+      return res.status(403).send(`<a href="/login">Invalid Credentials</a>`);
     }
   };
   req.session.userId = verifyEmail(req.body.email, users)['user_id'];
