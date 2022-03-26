@@ -30,23 +30,23 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  const templateVars = { urls: urlDatabase, user: req.session.userId }
+  const templateVars = { urls: urlDatabase, user: req.session.userId };
   res.render("login", templateVars);
 });
 
 app.get("/urls", (req,res) => {
   const currentUserId = req.session.userId;
   if (currentUserId) {
-    const templateVars = { 
+    const templateVars = {
       urls: userUrls(urlDatabase, currentUserId),
       user: users[currentUserId],
     };
-  res.render("urls_index", templateVars);
+    res.render("urls_index", templateVars);
   } else {
     const templateVars = {
       urls: {},
       user: ''
-    }
+    };
     res.render("urls_index", templateVars);
   }
 });
@@ -57,13 +57,18 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  if (!(req.session.userId)) {
-    return res.status(401).send("Unauthorized access");
-  };
   if (!urlDatabase[req.params.shortURL]) {
     return res.status(404).send("Requested URL not found!");
-  };
-  const templateVars = { 
+  }
+
+  const shortURL = req.params.shortURL;
+  const currentUserId = req.session.userId;
+  const urlUserId = urlDatabase[shortURL]["userID"];
+  if (currentUserId !== urlUserId || !currentUserId) {
+    return res.status(401).send("Unauthorized access!");
+  }
+
+  const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
     user: users[req.session.userId]
@@ -74,7 +79,7 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
     return res.status(404).send("Requested URL not found!");
-  };
+  }
   const longURL = urlDatabase[req.params.shortURL].longURL;
   if (longURL) {
     res.redirect(longURL);
@@ -137,7 +142,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send(`Please fill in the <a href="/register">required</a> fields!`);
   }
   if (verifyEmail(userEmail, users)) {
-    return res.status(400).send(`Email already exists! Please <a href="/login">login</a>`)
+    return res.status(400).send(`Email already exists! Please <a href="/login">login</a>`);
   }
   const user_id = generateRandomString();
   const { email, password } = req.body;
@@ -150,16 +155,16 @@ app.post("/register", (req, res) => {
 app.post("/login", (req,res) => {
   if (req.body.email === "" || req.body.password === "") {
     return res.status(403).send(`Please provide <a href="/login">email and password</a>`);
-  };
+  }
   if (!verifyEmail(req.body.email, users)) {
     return res.status(403).send(`Email not found, please <a href="/register">register</a>`);
-  };
+  }
   if (verifyEmail(req.body.email, users)) {
     const id = verifyEmail(req.body.email, users)['user_id'];
     if (!bcrypt.compareSync(req.body.password, users[id]['password'])) {
       return res.status(403).send(`<a href="/login">Invalid Credentials</a>`);
     }
-  };
+  }
   req.session.userId = verifyEmail(req.body.email, users)['user_id'];
   res.redirect("/urls");
 });

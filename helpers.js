@@ -10,14 +10,13 @@ const verifyEmail = (email, users) => {
       return users[user];
     }
   }
-  return undefined;
 };
 
 //to verify the urls belongs to the logged in user
-const userUrls = (urlDatabase, user_id) => {
+const userUrls = (urlDatabase, userId) => {
   let userUrl = {};
   for (let url in urlDatabase) {
-    if (urlDatabase[url]['userID'] === user_id) {
+    if (urlDatabase[url]['userID'] === userId) {
       userUrl[url] = urlDatabase[url]['longURL']
     }
   }
